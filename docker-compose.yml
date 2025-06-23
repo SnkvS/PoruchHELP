@@ -1,0 +1,44 @@
+services:
+  postgresdb:
+    image: postgres:latest
+    container_name: poruch-postgres
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+    ports:
+      - $POSTGRES_LOCAL_PORT:$POSTGRES_DOCKER_PORT
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  app:
+    container_name: poruch-app
+    depends_on:
+      postgresdb:
+        condition: service_healthy
+    restart: on-failure
+    image: poruch_help:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: ./.env
+    ports:
+      - $SPRING_LOCAL_PORT:$SPRING_DOCKER_PORT
+    environment:
+      SPRING_APPLICATION_JSON: '{
+        "server.address": "0.0.0.0",
+        "spring.datasource.url": "jdbc:postgresql://postgresdb:$POSTGRES_DOCKER_PORT/$POSTGRES_DB",
+        "spring.datasource.username": "$POSTGRES_USER",
+        "spring.datasource.password": "$POSTGRES_PASSWORD",
+        "spring.datasource.driver-class-name": "org.postgresql.Driver",
+        "spring.jpa.hibernate.ddl-auto": "validate",
+        "spring.jpa.open-in-view": false,
+        "token.expiration": "$TOKEN_EXPIRATION",
+        "token.secret": "$TOKEN_SECRET"
+      }'
