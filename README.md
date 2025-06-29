@@ -187,7 +187,7 @@ Once the application is running, you can access the API documentation:
 
 - **Authentication**:
   - `POST /api/auth/login` - User login
-  - `POST /api/auth/register` - User registration
+  - `POST /api/auth/registration` - User registration
   
 - **Test Endpoints**:
   - `GET /api/test` - Test endpoint
