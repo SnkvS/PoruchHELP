@@ -23,7 +23,7 @@ services:
       postgresdb:
         condition: service_healthy
     restart: on-failure
-    image: snkvs/poruch_help:1.0
+    image: snkvs/poruch_help:latest
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
